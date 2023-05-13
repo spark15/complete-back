@@ -94,6 +94,27 @@ connect()
       }
     })
 
+    app.get('/chat', async (req, res) => {
+      const { license, email } = req.body;
+      if (!(license && email)) {
+        res.send(400)
+      } else {
+        if (license == 0) {
+          var ret = await board.collection("qa").find().toArray()
+          res.json(ret)
+        } else if (license == 1) {
+          var ret = await board.collection("qa").find().toArray()
+          res.json(ret)
+        }
+      }
+    })
+
+    app.post('/chat', async (req, res) => {
+
+    })
+
+    
+
     var server = app.listen(80, function () {
     var host = server.address().address;
     var port = server.address().port;
