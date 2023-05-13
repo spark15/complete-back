@@ -5,7 +5,7 @@ import cors from 'cors'
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ credentials: true, origin: "http://localhost:3001" }));
+app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
   
 app.get('/', function (req, res) {
   res.send('Hello World!');
@@ -17,7 +17,7 @@ function isEmpty(obj) {
           return false;
   }
   return true;
-}
+} 
 
 connect()
   .then((client) => {
@@ -26,6 +26,7 @@ connect()
 
     console.log('Connected to the Pet database');
 
+    // API call to login and leave a session information but it has not been implemented because of priority
     app.post('/login', async (req, res) => {
       const { email, pwd } = req.body;
       if (!(email && pwd)) {
@@ -34,13 +35,14 @@ connect()
         var pre = await pet.collection("users").findOne({email: email, pwd: pwd});
         console.log(pre)
         if (isEmpty(pre)) {
-          res.json({result: "No credential matched"});
+          res.send(400);
         } else {
           res.json(pre)
         }
       }
     })
 
+    // API call to make an account
     app.post('/register', async (req, res) => {
       const { email, pwd, firstName, lastName, license, pets } = req.body
       if (!(email && pwd && firstName && lastName && license && pets )) {
@@ -63,10 +65,12 @@ connect()
       }
     })
 
+    // API call to get the articles from the board.
     app.get('/board', async (req, res) => {
       res.json(await board.collection('blog').find({}).toArray());
     })
 
+    // API call to get all the breeds
     app.post('/breeds', async (req, res) => {
       const { name, size, loyality } = req.body;
       if (!(name && size && loyality)) {
@@ -76,9 +80,23 @@ connect()
       }
     })
 
-    var server = app.listen(3000, function () {
+    // API call to edit the profile. Only firstname and lastName and pwd are allowed to be changed at this point.
+    app.put('/EditProfile', async (req, res) => {
+      const { firstName, lastName, email, pwd } = req.body;
+      console.log(req.body)
+      var err = await pet.collection('users').updateOne(
+        {email: email},
+        {$set: {firstName: firstName, lastName: lastName, pwd: pwd}});
+      if (err.status == 400) {
+        res.send(400)
+      } else {
+        res.send(200)
+      }
+    })
+
+    var server = app.listen(80, function () {
     var host = server.address().address;
     var port = server.address().port;
   
-    console.log('Server is working : PORT - ',port);
+    console.log('Server is working : PORT - ', 80);
 })});
